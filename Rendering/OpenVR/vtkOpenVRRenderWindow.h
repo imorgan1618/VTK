@@ -41,10 +41,17 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkOpenGLRenderWindow.h"
 
 #define SDL_MAIN_HANDLED
+// Dependency Includes
 #include <SDL.h> // for ivars
 #include <openvr.h> // for ivars
+
+// SDL includes
 #include <vector> // ivars
+
+// VTK includes
 #include "vtkOpenGLHelper.h" // used for ivars
+#include "vtkOpenGLRenderWindow.h"
+#include "vtkTexture.h"
 #include "vtk_glew.h" // used for methods
 
 class vtkOpenVRModel;
@@ -76,6 +83,26 @@ public:
   // Handles work required once both views have been rendered when using
   // stereo rendering.
   virtual void StereoRenderComplete();
+  
+  // Description:
+  // Enables or disables texture backgrounds for all renderers in the render collection
+  void SetTexturedBackground(bool);
+
+  // Description:
+  // Set the background texture for the left eye
+  vtkSetObjectMacro(LeftBackgroundTexture, vtkTexture);
+
+  // Description:
+  // Get the background texture for the left eye
+  vtkGetObjectMacro(LeftBackgroundTexture, vtkTexture);
+
+  // Description:
+  // Set the background texture for the right eye
+  vtkSetObjectMacro(RightBackgroundTexture, vtkTexture);
+
+  // Description:
+  // Get the background texture for the right eye
+  vtkGetObjectMacro(RightBackgroundTexture, vtkTexture);
 
   // Description:
   // End the rendering process and display the image.
@@ -196,6 +223,8 @@ protected:
   // a value of NULL means the context may already be destroyed
   virtual void ReleaseGraphicsResources(vtkRenderWindow *);
 
+  void SetBackgroundTextureInternal(vtkTexture* texture);
+
   virtual void CreateAWindow() {};
   virtual void DestroyWindow() {};
 
@@ -249,6 +278,12 @@ protected:
 
   // used in computing the pose
   vtkTransform *HMDTransform;
+  
+  vtkTexture* LeftBackgroundTexture;
+  vtkTexture* RightBackgroundTexture;
+
+  GLuint LeftBackgroundGLTextureId;
+  GLuint RightBackgroundGLTextureId;
 
 private:
   vtkOpenVRRenderWindow(const vtkOpenVRRenderWindow&);  // Not implemented.

@@ -305,6 +305,8 @@ vtkOpenVRRenderWindow::vtkOpenVRRenderWindow()
   this->HMDTransform = vtkTransform::New();
   this->ContextId = 0;
   this->WindowId = 0;
+  this->LeftBackgroundTexture = NULL;
+  this->RightBackgroundTexture = NULL;
   memset(this->TrackedDeviceToRenderModel, 0, sizeof(this->TrackedDeviceToRenderModel));
 }
 
@@ -611,7 +613,24 @@ void vtkOpenVRRenderWindow::Render()
 
 void vtkOpenVRRenderWindow::StereoUpdate()
 {
-  // camera handles what we need
+  // vtkOpenVRCamera managed what we need
+
+  // Set the left eye background texture before rendering of the left eye
+  SetBackgroundTextureInternal(this->LeftBackgroundTexture);
+}
+
+void vtkOpenVRRenderWindow::SetBackgroundTextureInternal(vtkTexture* texture)
+{
+  vtkRenderer *ren;
+  vtkCollectionSimpleIterator rit;
+  this->Renderers->InitTraversal(rit);
+  while ((ren = this->Renderers->GetNextRenderer(rit)))
+    {
+    if (ren->GetTexturedBackground())
+      {
+      ren->SetBackgroundTexture(texture);
+      }
+    }
 }
 
 void vtkOpenVRRenderWindow::StereoMidpoint()
@@ -631,6 +650,9 @@ void vtkOpenVRRenderWindow::StereoMidpoint()
 
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0 );
+
+  // Set the right eye background texture before rendering of the right eye
+  SetBackgroundTextureInternal(this->RightBackgroundTexture);
 }
 
 void  vtkOpenVRRenderWindow::StereoRenderComplete()
@@ -650,6 +672,17 @@ void  vtkOpenVRRenderWindow::StereoRenderComplete()
 
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0 );
+}
+
+void vtkOpenVRRenderWindow::SetTexturedBackground(bool arg)
+{
+  vtkRenderer *ren;
+  vtkCollectionSimpleIterator rit;
+  this->Renderers->InitTraversal(rit);
+  while ((ren = this->Renderers->GetNextRenderer(rit)))
+    {
+    ren->SetTexturedBackground(arg);
+    }
 }
 
 // End the rendering process and display the image.
