@@ -52,6 +52,8 @@ public:
   vtkSetVector3Macro(Translation,double);
   vtkGetVector3Macro(Translation,double);
 
+  void setTrackingData(vtkMatrix4x4 *&trackingMat);
+
 protected:
   vtkOpenVRCamera();
   ~vtkOpenVRCamera();
@@ -72,6 +74,8 @@ protected:
 
   vtkMatrix4x4 *LeftEyeTCDCMatrix;
   vtkMatrix4x4 *RightEyeTCDCMatrix;
+
+  vtkMatrix4x4 *hmdMatrix;
 
   // used to translate the
   // View to the HMD space

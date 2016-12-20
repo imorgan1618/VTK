@@ -41,6 +41,7 @@ https://github.com/ValveSoftware/openvr/blob/master/LICENSE
 #include "vtkShaderProgram.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkOpenVRCamera.h"
+#include "vtkMatrix4x4.h"
 
 #include <cmath>
 #include <sstream>
@@ -307,6 +308,7 @@ vtkOpenVRRenderWindow::vtkOpenVRRenderWindow()
   this->WindowId = 0;
   this->LeftBackgroundTexture = NULL;
   this->RightBackgroundTexture = NULL;
+  this->hmdMatrix = vtkMatrix4x4::New();
   memset(this->TrackedDeviceToRenderModel, 0, sizeof(this->TrackedDeviceToRenderModel));
 }
 
@@ -525,6 +527,26 @@ void vtkOpenVRRenderWindow::SetPosition(int x, int y)
     }
 }
 
+void vtkOpenVRRenderWindow::setTrackingData(vtkMatrix4x4 *&hmdPose)
+{
+	this->hmdMatrix->SetElement(0, 0, hmdPose->GetElement(0, 0));
+	this->hmdMatrix->SetElement(0, 1, hmdPose->GetElement(0, 1));
+	this->hmdMatrix->SetElement(0, 2, hmdPose->GetElement(0, 2));
+	this->hmdMatrix->SetElement(0, 3, hmdPose->GetElement(0, 3));
+	this->hmdMatrix->SetElement(1, 0, hmdPose->GetElement(1, 0));
+	this->hmdMatrix->SetElement(1, 1, hmdPose->GetElement(1, 1));
+	this->hmdMatrix->SetElement(1, 2, hmdPose->GetElement(1, 2));
+	this->hmdMatrix->SetElement(1, 3, hmdPose->GetElement(1, 3));
+	this->hmdMatrix->SetElement(2, 0, hmdPose->GetElement(2, 0));
+	this->hmdMatrix->SetElement(2, 1, hmdPose->GetElement(2, 1));
+	this->hmdMatrix->SetElement(2, 2, hmdPose->GetElement(2, 2));
+	this->hmdMatrix->SetElement(2, 3, hmdPose->GetElement(2, 3));
+	this->hmdMatrix->SetElement(3, 0, hmdPose->GetElement(3, 0));
+	this->hmdMatrix->SetElement(3, 1, hmdPose->GetElement(3, 1));
+	this->hmdMatrix->SetElement(3, 2, hmdPose->GetElement(3, 2));
+	this->hmdMatrix->SetElement(3, 3, hmdPose->GetElement(3, 3));
+}
+
 void vtkOpenVRRenderWindow::UpdateHMDMatrixPose()
 {
   vr::VRCompositor()->WaitGetPoses(this->TrackedDevicePose,
@@ -547,7 +569,7 @@ void vtkOpenVRRenderWindow::UpdateHMDMatrixPose()
       double pos[3];
       for (int i = 0; i < 3; i++)
         {
-        pos[i] = tdPose.mDeviceToAbsoluteTracking.m[i][3];
+		  pos[i] = this->hmdMatrix->GetElement(i, 3);// tdPose.mDeviceToAbsoluteTracking.m[i][3];
         }
 
       double distance = cam->GetDistance();
@@ -561,9 +583,9 @@ void vtkOpenVRRenderWindow::UpdateHMDMatrixPose()
       double ortho[3][3];
       for (int i = 0; i < 3; i++)
         {
-        ortho[0][i] = tdPose.mDeviceToAbsoluteTracking.m[0][i];
-        ortho[1][i] = tdPose.mDeviceToAbsoluteTracking.m[1][i];
-        ortho[2][i] = tdPose.mDeviceToAbsoluteTracking.m[2][i];
+		  ortho[0][i] = this->hmdMatrix->GetElement(0, i); // tdPose.mDeviceToAbsoluteTracking.m[0][i];
+		  ortho[1][i] = this->hmdMatrix->GetElement(1, i); // tdPose.mDeviceToAbsoluteTracking.m[1][i];
+		  ortho[2][i] = this->hmdMatrix->GetElement(2, i); // tdPose.mDeviceToAbsoluteTracking.m[2][i];
         }
       if (vtkMath::Determinant3x3(ortho) < 0)
         {

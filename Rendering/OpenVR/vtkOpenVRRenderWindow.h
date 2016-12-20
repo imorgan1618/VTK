@@ -53,6 +53,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkTexture.h"
 #include "vtk_glew.h" // used for methods
+#include "vtkMatrix4x4.h"
 
 class vtkOpenVRModel;
 class vtkOpenGLVertexBufferObject;
@@ -214,6 +215,8 @@ public:
   vr::TrackedDevicePose_t &GetTrackedDevicePose(vr::TrackedDeviceIndex_t idx) {
     return this->TrackedDevicePose[idx]; };
 
+  void setTrackingData(vtkMatrix4x4 *&hmdPose);
+
 protected:
   vtkOpenVRRenderWindow();
   ~vtkOpenVRRenderWindow();
@@ -284,6 +287,8 @@ protected:
 
   GLuint LeftBackgroundGLTextureId;
   GLuint RightBackgroundGLTextureId;
+
+  vtkMatrix4x4 *hmdMatrix;
 
 private:
   vtkOpenVRRenderWindow(const vtkOpenVRRenderWindow&);  // Not implemented.
